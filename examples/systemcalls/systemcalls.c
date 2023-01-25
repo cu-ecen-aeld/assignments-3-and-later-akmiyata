@@ -17,6 +17,10 @@ bool do_system(const char *cmd)
  *   or false() if it returned a failure
 */
 
+    if(system(cmd))
+    {
+	    return false;
+    }
     return true;
 }
 
@@ -58,6 +62,22 @@ bool do_exec(int count, ...)
  *   as second argument to the execv() command.
  *
 */
+    int status;
+    pid_ pid = fork();
+    if (pid == 0)
+    {
+	    execv(command[0], command);
+	    perror("Exec failure");
+	    exit(-1);
+    }
+    else 
+    {
+	    if (waitpid(pid, &status, 0) == -1) 
+	    {
+		    perror("Waitpid failure");
+		    return false;
+	    }
+    }
 
     va_end(args);
 
@@ -93,7 +113,43 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
  *
 */
 
-    va_end(args);
+    int fd = open(outputfile, O_WRONLY|O_TRUNC|O_CREAT, 0664);
+    if (fd<0)
+    {
+	    perror("Open failure");
+	    return false;
+    }
 
-    return true;
+
+    //Copied from above
+    int status;
+    pid_ pid = fork();
+    
+    if (pid==0)
+    {
+            if (dup2(fd, 1)<0)
+	    {
+		    perror("Dup2 error");
+		    return false;
+	    }
+	    close(fd);
+            execv(command[0], command);
+ 
+            exit(-1);
+    }
+    else
+    {
+	    close(fd);
+            if (waitpid(pid, &status, 0) == -1)
+            {
+                    perror("Waitpid failure");
+                    return false;
+            }
+    	    if (WIFEXITED(status))
+    	    {
+	    	    return WEXITSTATUS(status)==0;
+    	    }
+    }
+
+    return false;
 }
