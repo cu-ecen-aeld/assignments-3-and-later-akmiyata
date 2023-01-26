@@ -1,4 +1,11 @@
 #include "systemcalls.h"
+#include <stdlib.h>
+
+#include <errno.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <string.h>
+#include <fcntl.h>
 
 /**
  * @param cmd the command to execute with system()
@@ -62,27 +69,45 @@ bool do_exec(int count, ...)
  *   as second argument to the execv() command.
  *
 */
-    int status;
-    pid_ pid = fork();
-    if (pid == 0)
+    pid_t pid = fork();
+    if (pid<0)
     {
-	    execv(command[0], command);
-	    perror("Exec failure");
-	    exit(-1);
+    	return false;
     }
-    else 
+    else if(pid==0)
     {
-	    if (waitpid(pid, &status, 0) == -1) 
-	    {
-		    perror("Waitpid failure");
-		    return false;
-	    }
+    	if(execv(command[0], command) == -1)
+    	{
+    		abort();
+    	}
     }
-
+    else
+    {
+    	int waitStatus;
+    	waitpid(pid, &waitStatus, 0);
+    	if(waitStatus==-1)
+    	{
+    		return false;
+    	}
+    	
+    	if(WIFEXITED(waitStatus)==true)
+    	{
+    		if(WEXITSTATUS(waitStatus) != 0)
+    		{
+    			return false;
+    		}
+    	}
+    	else
+    	{
+    		return false;
+    	}
+    	
+     }
+    
     va_end(args);
-
     return true;
 }
+
 
 /**
 * @param outputfile - The full path to the file to write with command output.
@@ -122,34 +147,51 @@ bool do_exec_redirect(const char *outputfile, int count, ...)
 
 
     //Copied from above
-    int status;
-    pid_ pid = fork();
+    pid_t pid = fork();
+    int waitStat;
     
-    if (pid==0)
+    if(pid==-1)
     {
-            if (dup2(fd, 1)<0)
-	    {
-		    perror("Dup2 error");
-		    return false;
-	    }
-	    close(fd);
-            execv(command[0], command);
- 
-            exit(-1);
-    }
+    	perror("Fork error");
+    	close(fd);
+    	return false;
+    }	
+    else if(pid==0)
+    {
+    	if(dup2(fd, 1)<0)
+    	{
+    		perror("dup2");
+    		abort();
+    	}
+    	close(fd);
+    	
+    	if(execv(command[0], command)==-1)
+    	{
+    		abort();
+    	}
+    }	
     else
     {
-	    close(fd);
-            if (waitpid(pid, &status, 0) == -1)
-            {
-                    perror("Waitpid failure");
-                    return false;
-            }
-    	    if (WIFEXITED(status))
-    	    {
-	    	    return WEXITSTATUS(status)==0;
-    	    }
+    	waitpid(pid, &waitStat, 0);
+    	if(waitStat==-1)
+    	{
+    		return false;
+    	}
+    	
+    	if(WIFEXITED(waitStat)==true)
+    	{
+    		if(WEXITSTATUS(waitStat)!=0)
+    		{
+    			return false;
+    		}
+    	}
+    	else
+    	{
+    		return false;
+    	}
     }
-
-    return false;
-}
+    
+    va_end(args);
+    return true;
+    }	    
+   
