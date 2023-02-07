@@ -16,7 +16,7 @@ then
 	echo "Added prefix"
 else
 	CONF_D=/etc/finder-app/
-	PREFIX=./
+	PREFIX=
 	echo "No prefix needed"
 fi
 
