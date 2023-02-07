@@ -1,14 +1,13 @@
-CROSS_COMPILE= 
+GCC=$(CROSS_COMPILE)gcc
+CFLAGS= -g -Wall
+FL=writer
 
 all: writer
 
-writer.o: writer.c
-	$(CROSS_COMPILE)gcc -g -Wall -c writer.c
-
-writer: writer.o
-	$(CROSS_COMIPLE)gcc -g -Wall writer.o -o writer
+writer: writer.c
+	arch64-none-linux-gnu-$(GCC) $(CFLAGS) -o writer writer.c
 
 clean:
-	rm -f writer.o writer
+	rm -f writer *.o
 
 
