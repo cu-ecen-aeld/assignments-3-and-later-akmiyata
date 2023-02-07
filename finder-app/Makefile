@@ -1,3 +1,5 @@
+CROSS_COMPILE= 
+
 all: writer
 
 writer.o: writer.c
