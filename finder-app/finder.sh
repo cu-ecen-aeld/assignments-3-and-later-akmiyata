@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /bin/sh
 #First argument is full path to file (including filename), aka "filesdir"
 #second arg is text to be found within the file, aka "searchstr"
 #exits with return value 1 if any parameters not specified
