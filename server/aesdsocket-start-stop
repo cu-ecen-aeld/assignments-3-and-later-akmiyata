@@ -6,7 +6,7 @@ case "$1" in
 		;;
 	stop)
 		echo "Stopping aesdsocket daemon"
-		start-stop-daemon -K -n aesdsocket
+		start-stop-daemon -K -n aesdsocket 
 		;;
 
 	*)

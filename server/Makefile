@@ -1,5 +1,5 @@
-#CC=aarch64-none-linux-gnu-gcc
-CC=gcc
+CC=aarch64-none-linux-gnu-gcc
+#CC=gcc
 CFLAGS= -g -Wall
 FL=aesdsocket aesdsocket.c
 
