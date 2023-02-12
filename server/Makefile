@@ -7,7 +7,7 @@ all: aesdsocket
 
 aesdsocket: aesdsocket.c
 	$(CC) $(CFLAGS) $(INCLUDES) $(OBJS) -o $(FL) $(LDFLAGS)
-	chmod u+x
+
 clean:
 	rm -f aesdsocket *.o
 
