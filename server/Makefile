@@ -6,7 +6,7 @@ FL=aesdsocket aesdsocket.c
 all: aesdsocket
 
 aesdsocket: aesdsocket.c
-	$(CC) $(CFLAGS) $(INCLUDES) $(OBJS) -o $(FL) $(LDFLAGS)
+	$(CC) -static $(CFLAGS) $(INCLUDES) $(OBJS) -o $(FL) $(LDFLAGS)
 
 clean:
 	rm -f aesdsocket *.o
